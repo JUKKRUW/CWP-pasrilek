@@ -1,4 +1,4 @@
-from checkmate import checkmate
+from discovery_piscine.rush.ex00.checkmate import checkmate
 
 
 def main():
