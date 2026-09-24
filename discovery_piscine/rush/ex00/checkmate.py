@@ -1,63 +1,57 @@
-def checkmate(board):
+def attackers(board):
     if not isinstance(board, str):
-        print("Error")
-        return
+        return None
 
     rows = board.splitlines()
     size = len(rows)
-
     if size == 0 or any(len(row) != size for row in rows):
-        print("Error")
-        return
+        return None
 
     kings = [
-        (r, c)
-        for r in range(size)
-        for c in range(size)
-        if rows[r][c] == "K"
+        (row, col)
+        for row in range(size)
+        for col in range(size)
+        if rows[row][col] == "K"
     ]
-    print(kings)
     if len(kings) != 1:
-        print("Error")
-        return
+        return None
 
     king_row, king_col = kings[0]
+    found = []
 
     pawn_row = king_row + 1
     if pawn_row < size:
         for pawn_col in (king_col - 1, king_col + 1):
             if 0 <= pawn_col < size and rows[pawn_row][pawn_col] == "P":
-                print("Success")
-                return
+                found.append(("P", pawn_row + 1, pawn_col + 1))
 
-    directions = [
+    directions = (
         (-1, 0), (1, 0), (0, -1), (0, 1),
         (-1, -1), (-1, 1), (1, -1), (1, 1),
-    ]
-
+    )
     for row_step, col_step in directions:
-        r = king_row + row_step
-        c = king_col + col_step
-
-        while 0 <= r < size and 0 <= c < size:
-            piece = rows[r][c]
-
-            if piece == "Q":
-                print("Success")
-                return
-            if row_step == 0 or col_step == 0:
-                if piece == "R":
-                    print("Success")
-                    return
-            else:
-                if piece == "B":
-                    print("Success")
-                    return
-
+        row = king_row + row_step
+        col = king_col + col_step
+        while 0 <= row < size and 0 <= col < size:
+            piece = rows[row][col]
+            straight = row_step == 0 or col_step == 0
+            if piece == "Q" or (straight and piece == "R") or (
+                not straight and piece == "B"
+            ):
+                found.append((piece, row + 1, col + 1))
             if piece in "KPRBQ":
                 break
+            row += row_step
+            col += col_step
 
-            r += row_step
-            c += col_step
+    return found
 
-    print("Fail")
+
+def checkmate(board):
+    found = attackers(board)
+    if found is None:
+        print("Error")
+    elif found:
+        print("Success")
+    else:
+        print("Fail")
